@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
   PID pid_cte;
   PID pid_speed;
 
-  // Manual determined values
+  // manual determined values
   double kp_cte = 0.25;
   double ki_cte = 0.08;
   double kd_cte = 300;
@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
     kd_speed = std::stod(argv[6]);
   }
 
-  // Values under control
+  // values under control
   double steer_value = 0.0;
   double throttle = 1.0;
 
@@ -54,25 +54,26 @@ int main(int argc, char *argv[]) {
   pid_cte.Init(0.0, kp_cte, ki_cte, kd_cte);
   pid_speed.Init(1.0, kp_speed, ki_speed, kd_speed);
 
-  if (WRITE_OUTPUT) {
-    auto t = std::time(nullptr);
-    auto tm = *std::localtime(&t);
-    std::stringstream ss;
-    ss << "test_" << std::put_time(&tm, "%d-%m-%Y_%H-%M-%S") << ".csv";
+#if WRITE_OUTPUT
+  // Construct filename with current date time
+  auto t = std::time(nullptr);
+  auto tm = *std::localtime(&t);
+  std::stringstream ss;
+  ss << "test_" << std::put_time(&tm, "%d-%m-%Y_%H-%M-%S") << ".csv";
 
-    FileWriter fileWriter(ss.str());
+  FileWriter fileWriter(ss.str());
 
-    fileWriter.writePidParameters("PID_cte:", kp_cte, ki_cte, kd_cte);
-    fileWriter.writePidParameters("PID_speed:", kp_speed, ki_speed, kd_speed);
-    fileWriter.writeLine("Opt:none");
-    size_t time_start = 0;
-  }
+  fileWriter.writePidParameters("PID_cte:", kp_cte, ki_cte, kd_cte);
+  fileWriter.writePidParameters("PID_speed:", kp_speed, ki_speed, kd_speed);
+  fileWriter.writeLine("Opt:none");
+  size_t time_start = 0;
+#endif
 
-  if (PRINT_STATS) {
-    double max_speed = 0;
-    double avg_speed = 0;
-    size_t counter = 0;
-  }
+#if PRINT_STATS
+  double max_speed = 0;
+  double avg_speed = 0;
+  size_t counter = 0;
+#endif
 
   h.onMessage([&](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
                   uWS::OpCode opCode) {
@@ -81,11 +82,9 @@ int main(int argc, char *argv[]) {
     // The 2 signifies a websocket event
     if (length && length > 2 && data[0] == '4' && data[1] == '2') {
       auto s = hasData(std::string(data).substr(0, length));
-
       if (s != "") {
         auto j = json::parse(s);
         std::string event = j[0].get<std::string>();
-
         if (event == "telemetry") {
           // j[1] is the data JSON object
           double cte = std::stod(j[1]["cte"].get<std::string>());
@@ -114,30 +113,28 @@ int main(int argc, char *argv[]) {
           throttle = pid_speed.GetCorrection();
           throttle = normalize(throttle);
 
-          if (PRINT_STATS) {
-            // Calculate average speed
-            counter++;
-            avg_speed = ((avg_speed * (counter - 1)) + speed) / counter;
+#if PRINT_STATS
+          // Calculate average speed
+          counter++;
+          avg_speed = ((avg_speed * (counter - 1)) + speed) / counter;
 
-            // Remember maximum speed
-            if (speed > max_speed) max_speed = speed;
+          // Remember maximum speed
+          if (speed > max_speed) max_speed = speed;
 
-            std::cout << "CTE: " << cte << " Angle: " << angle
-                      << " Steering Value: " << steer_value
-                      << " Diff: " << (angle / 25.0) - steer_value
-                      << " Speed: " << speed << " Throttle: " << throttle
-                      << " Avg. speed: " << avg_speed
-                      << " Max speed: " << max_speed << std::endl;
-          }
+          std::cout << "CTE: " << cte << " Angle: " << angle
+                    << " Steering Value: " << steer_value
+                    << " Diff: " << (angle / 25.0) - steer_value
+                    << " Speed: " << speed << " Throttle: " << throttle
+                    << " Avg. speed: " << avg_speed
+                    << " Max speed: " << max_speed << std::endl;
+#endif
+#if WRITE_OUTPUT
+          if (time_start <= 0) time_start = time_ms;
 
-          if (WRITE_OUTPUT) {
-            if (time_start <= 0) time_start = time_ms;
-
-            fileWriter.writeLine(time_ms - time_start, cte, speed, angle,
-                                 steer_value, throttle, pid_cte.GetTotalError(),
-                                 pid_cte.GetAveragedError());
-          }
-
+          fileWriter.writeLine(time_ms - time_start, cte, speed, angle,
+                               steer_value, throttle, pid_cte.GetTotalError(),
+                               pid_cte.GetAveragedError());
+#endif
           json msgJson;
           msgJson["steering_angle"] = steer_value;
           msgJson["throttle"] = throttle;
@@ -152,9 +149,6 @@ int main(int argc, char *argv[]) {
     }
   });
 
-  // We don't need this since we're not using HTTP but if it's removed the
-  // program
-  // doesn't compile :-(
   h.onHttpRequest([](uWS::HttpResponse *res, uWS::HttpRequest req, char *data,
                      size_t, size_t) {
     const std::string s = "<h1>Hello world!</h1>";
@@ -190,7 +184,6 @@ std::string hasData(std::string s) {
   auto found_null = s.find("null");
   auto b1 = s.find_first_of("[");
   auto b2 = s.find_last_of("]");
-
   if (found_null != std::string::npos) {
     return "";
   } else if (b1 != std::string::npos && b2 != std::string::npos) {
