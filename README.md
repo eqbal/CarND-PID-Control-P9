@@ -1,7 +1,38 @@
 # CarND-Controls-PID
 Self-Driving Car Engineer Nanodegree Program
 
----
+4th project of the 2nd term.
+
+## Introduction
+
+The purpose of this project is to create a PID controller to drive a car smoothly and successfully around the Udacity simulator.
+
+The task is to keep a car on a given track controlling the steering angle within the range [-25°, 25°] and a throttle within [-1, 1]. The measured values are the cross-track-error (CTE) for the current position of the car as well as the speed of the car. The task is to maximize the speed while keeping the car on the street (minimize the CTE).
+
+## Overview
+(later on)
+
+##Parameter search
+(later on)
+
+
+## Notes
+
+- CTE measurement errors. For example at start and at end of the bridge in the test track.
+
+- High steering angles reduces also the speed of the car.
+
+- New telemetry data will only be send after sending a steer command to the simulator. So processing time affects the sampling rate.
+
+## Limitations
+
+It's not possible to set the start position of the car within the test track nor can you determine the current position or the driven distance.
+
+## Results
+
+## Reflections
+
+## Tuning
 
 ## Dependencies
 
