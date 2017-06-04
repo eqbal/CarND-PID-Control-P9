@@ -9,8 +9,16 @@ The purpose of this project is to create a PID controller to drive a car smoothl
 
 The task is to keep a car on a given track controlling the steering angle within the range [-25°, 25°] and a throttle within [-1, 1]. The measured values are the cross-track-error (CTE) for the current position of the car as well as the speed of the car. The task is to maximize the speed while keeping the car on the street (minimize the CTE).
 
-## Overview
-(later on)
+PID stands for Proportional, Integral, and Derivative controller. A PID controller continuously calculates an error value `e(t)` as the difference between a desired setpoint and a measured process variable and applies a correction based on proportional, integral, and derivative terms (sometimes denoted P, I, and D respectively).
+
+
+![](assets/PID.png)
+
+
+## Flow with the Car
+
+![](assets/PID-Car.png)
+
 
 ##Parameter search
 (later on)
