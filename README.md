@@ -20,10 +20,6 @@ PID stands for Proportional, Integral, and Derivative controller. A PID controll
 ![](assets/PID-Car.png)
 
 
-##Parameter search
-(later on)
-
-
 ## Notes
 
 - CTE measurement errors. For example at start and at end of the bridge in the test track.
@@ -36,11 +32,50 @@ PID stands for Proportional, Integral, and Derivative controller. A PID controll
 
 It's not possible to set the start position of the car within the test track nor can you determine the current position or the driven distance.
 
-## Results
+## Tuning
+
+I used the `Twiddle` algorithm to tune the coefficient for the P, I and D components of the controller. 
+
+What the twiddle algorithm does is continually adjust the PID coefficients as the car drives, trying to find the best (or lowset) overall error. I found the following parameters which are set in the PID initialization as ones that provided a nice smooth driving experience around the track.
+
+```
+double kp_cte = 0.25;
+double ki_cte = 0.08;
+double kd_cte = 300;
+
+double kp_speed = 0.14;
+double ki_speed = 0.0;
+double kd_speed = 2.0;
+```
 
 ## Reflections
+The PID controller is made up fo 3 components:
 
-## Tuning
+###P - Proportional:
+
+Here we steer the car proportionally to its offset from the center of the road (or desired path). An issue with just using a proportional controller is overshoot.
+
+[![](http://img.youtube.com/vi/LSonm1fgvZc/0.jpg)](https://youtu.be/LSonm1fgvZc)
+
+###D - Differential:
+
+Here we add some feedback into the controller about how quickly it is moving back to the required path.
+
+Check out the video below to show the effect of P & D.
+
+[![](http://img.youtube.com/vi/Kk6OF_-DFQM/0.jpg)](https://youtu.be/Kk6OF_-DFQM)
+
+###I - Integration:
+
+Here we integrate (sum) over the error and feed this signal back into our controller to compensate for any drift in the vehicle. Drift can happen for various reasons such as misalignments of the wheels for example.
+
+
+## Results
+To reduce load on the test machine and increase sampling time by minimizing the response time, the implementation is tested with the lowest simulator details and resolution of 640x480.
+
+Without video capturing a average speed of approximately 45 mph (72.42 km/h) and a maximum speed of around 75 mph (120.7 km/h) can be achieved. Although the car sometimes oscillate a lot around the track center (still it's not an good idea to drink and drive) it keeps staying on the track without touching the road surface marking.
+
+Check out the video below in which PID has be applied using the best parameters found with the twiddle algorithm.
 
 ## Dependencies
 
