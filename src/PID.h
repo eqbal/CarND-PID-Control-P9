@@ -1,46 +1,44 @@
 #ifndef PID_H
 #define PID_H
 
-class PID {
-public:
-  /*
-  * Errors
-  */
-  double p_error;
-  double i_error;
-  double d_error;
+#include <iostream>
+#include <cmath>
 
-  /*
-  * Coefficients
-  */ 
+#define DEBUG 0
+
+class PID {
+ public:
+
+  // Coefficients
   double Kp;
   double Ki;
   double Kd;
 
-  /*
-  * Constructor
-  */
   PID();
 
-  /*
-  * Destructor.
-  */
   virtual ~PID();
+  void Init(double target, double Kp, double Ki, double Kd);
+  void Update(double error, double x);
 
-  /*
-  * Initialize PID.
-  */
-  void Init(double Kp, double Ki, double Kd);
+  // Getters
+  double GetTotalError() const;
+  double GetAveragedError() const;
+  double GetCorrection() const;
 
-  /*
-  * Update the PID error variables given cross track error.
-  */
-  void UpdateError(double cte);
+private:
+  double correction = 0;
+  double last_x_ = -1;
 
-  /*
-  * Calculate the total PID error.
-  */
-  double TotalError();
+  double target_ = 0;
+  double old_error_ = 0;
+  double error_sum = 0;
+  double error_sum_abs = 0;
+  double error_int = 0;
+
+  //Overflows not handled
+  size_t counter = 0;
+
+  void calculate(double error, double dt);
 };
 
 #endif /* PID_H */
