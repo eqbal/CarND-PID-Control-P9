@@ -80,6 +80,9 @@ Although the car sometimes oscillate a lot around the track center it keeps stay
 
 Check out the video below in which PID has be applied using the best parameters found with the twiddle algorithm.
 
+[![](http://img.youtube.com/vi/q9ha47pzDTk/0.jpg)](https://youtu.be/q9ha47pzDTk)
+
+
 ## Dependencies
 
 * cmake >= 3.5
